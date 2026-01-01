@@ -33,8 +33,8 @@ def toggle_question(exam_id, q_num):
 # [수정됨] 서버와 로컬 모두에서 폰트 찾기
 def get_korean_font_path():
     # 1순위: 깃허브에 같이 올린 폰트 파일 (서버용)
-    if os.path.exists("malgun.ttf"): 
-        return "malgun.ttf"
+    if os.path.exists("MALGUN.TTF"): 
+        return "MALGUN.TTF"
     
     # 2순위: 내 컴퓨터 윈도우 폰트 (로컬 테스트용)
     candidates = ["C:/Windows/Fonts/malgun.ttf", "C:/Windows/Fonts/gulim.ttf", "C:/Windows/Fonts/batang.ttf"]
@@ -263,3 +263,4 @@ else:
                 st.download_button("📥 다운로드", f, file_name=out_name, mime="application/pdf", use_container_width=True)
     else:
         st.warning("문제를 선택해주세요.")
+
