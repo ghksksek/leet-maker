@@ -18,7 +18,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("📑 나만의 맞춤 문제집 생성기 (최종 수정)")
+st.title("📑 나만의 맞춤 문제집 생성기 (클라우드 배포용)")
 
 # --- 0. 세션 초기화 ---
 if 'exam_cart' not in st.session_state: st.session_state.exam_cart = []
@@ -30,10 +30,17 @@ def toggle_question(exam_id, q_num):
     else: current_list.append(q_num); current_list.sort()
     st.session_state.selected_questions_map[exam_id] = current_list
 
+# [수정됨] 서버와 로컬 모두에서 폰트 찾기
 def get_korean_font_path():
-    candidates = ["C:/Windows/Fonts/malgun.ttf", "C:/Windows/Fonts/gulim.ttf", "C:/Windows/Fonts/batang.ttf", "C:/Windows/Fonts/NanumGothic.ttf"]
+    # 1순위: 깃허브에 같이 올린 폰트 파일 (서버용)
+    if os.path.exists("malgun.ttf"): 
+        return "malgun.ttf"
+    
+    # 2순위: 내 컴퓨터 윈도우 폰트 (로컬 테스트용)
+    candidates = ["C:/Windows/Fonts/malgun.ttf", "C:/Windows/Fonts/gulim.ttf", "C:/Windows/Fonts/batang.ttf"]
     for path in candidates:
         if os.path.exists(path): return path
+        
     return None
 
 # --- 1. 사이드바 ---
@@ -143,10 +150,10 @@ else:
             COL_GAP = 12 * PT_PER_MM
             COL_W = (PAGE_W - (2 * MARGIN) - COL_GAP) / 2
             
-            # [고정 설정값]
+            # [고정값 설정]
             FIXED_NUM_POS_X_MM = 0   # 가로 이동 0mm
             FIXED_NUM_POS_Y_MM = 1   # 세로 이동 1mm
-            FIXED_FONT_SIZE = 13     # 글자 크기 13
+            FIXED_FONT_SIZE = 13     # 글자 크기 13pt
             
             # PT 단위 변환
             NUM_X_PT = FIXED_NUM_POS_X_MM * PT_PER_MM
@@ -154,6 +161,7 @@ else:
             
             HEADER_H_PT = 20 if show_source else 0
             
+            # [수정됨] 지우개 너비 19px로 고정
             FIXED_MASK_W = 19
             FIXED_MASK_H = 20
             
@@ -222,26 +230,23 @@ else:
                             else:
                                 curr_page.insert_image(rect, filename=img_path)
                             
-                            # [3] 지우개 (고정값)
+                            # [3] 지우개 (19x20 고정)
                             shape = curr_page.new_shape()
                             shape.draw_rect(fitz.Rect(cx, img_start_y, cx + FIXED_MASK_W, img_start_y + FIXED_MASK_H))
                             shape.finish(color=(1, 1, 1), fill=(1, 1, 1), width=0)
                             shape.commit()
 
-                            # [4] 새 번호 (볼드 효과: 0.7pt 이동하여 겹쳐 쓰기)
-                            # render_mode 등 복잡한 옵션 없이 가장 확실한 방법 사용
+                            # [4] 새 번호 (겹쳐 쓰기로 볼드 처리)
                             num_pt = (cx + NUM_X_PT, img_start_y + NUM_Y_PT + FIXED_FONT_SIZE)
                             num_str = f"{new_q_num}."
                             
                             if final_font_path:
-                                # 원본
+                                # 원본 출력
                                 curr_page.insert_text(num_pt, num_str, fontname=fontname_alias, fontfile=final_font_path, fontsize=FIXED_FONT_SIZE, color=(0,0,0))
-                                # 볼드용 겹침 (오른쪽으로 0.7pt 이동)
+                                # 약간 옆에 한 번 더 출력 (Bold 효과)
                                 curr_page.insert_text((num_pt[0] + 0.7, num_pt[1]), num_str, fontname=fontname_alias, fontfile=final_font_path, fontsize=FIXED_FONT_SIZE, color=(0,0,0))
                             else:
-                                # 원본
                                 curr_page.insert_text(num_pt, num_str, fontsize=FIXED_FONT_SIZE, color=(0,0,0))
-                                # 볼드용 겹침
                                 curr_page.insert_text((num_pt[0] + 0.7, num_pt[1]), num_str, fontsize=FIXED_FONT_SIZE, color=(0,0,0))
 
                             new_q_num += 1
